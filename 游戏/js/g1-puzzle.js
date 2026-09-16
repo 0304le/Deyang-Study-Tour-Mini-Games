@@ -65,8 +65,37 @@
         function makePiece(p) {
           var el = G.el('div', 'puz-piece');
           el.dataset.i = p.idx;
-          el.style.backgroundImage = 'url("' + puz.img + '")';
+          // 预加载图片，失败时使用渐变占位
+          (function attachImage(element, src) {
+            try {
+              var loader = new Image();
+              // 允许跨域加载（如果图床支持）以避免 tainted canvas 问题
+              loader.crossOrigin = 'anonymous';
+              loader.onload = function () {
+                element.style.backgroundImage = 'url("' + loader.src + '")';
+                element.style.backgroundPosition = p.pos;
+                element.style.backgroundSize = (N * 100) + '% ' + (N * 100) + '%';
+              };
+              loader.onerror = function () {
+                console.warn('Puzzle image failed to load:', src);
+                // 回退占位样式，保持背景位置/size 以免布局跳动
+                element.style.backgroundImage = 'linear-gradient(135deg,#e7dcbf,#d7c8a2)';
+                element.style.backgroundPosition = p.pos;
+                element.style.backgroundSize = (N * 100) + '% ' + (N * 100) + '%';
+              };
+              loader.src = src;
+            } catch (e) {
+              console.warn('Image load error', e);
+              element.style.backgroundImage = 'linear-gradient(135deg,#e7dcbf,#d7c8a2)';
+              element.style.backgroundPosition = p.pos;
+              element.style.backgroundSize = (N * 100) + '% ' + (N * 100) + '%';
+            }
+          })(el, puz.img);
+
+          // 预先设置 position/size（防止样式被覆盖）
           el.style.backgroundPosition = p.pos;
+          el.style.backgroundSize = (N * 100) + '% ' + (N * 100) + '%';
+
           el.addEventListener('pointerdown', startDrag);
           return el;
         }
@@ -100,6 +129,7 @@
           ghost = G.el('div', 'puz-ghost');
           ghost.style.width = size + 'px';
           ghost.style.height = size + 'px';
+          // 复制当前碎片的背景（可能是图片或占位）
           ghost.style.backgroundImage = dragPiece.style.backgroundImage;
           ghost.style.backgroundPosition = dragPiece.style.backgroundPosition;
           ghost.style.backgroundSize = (N * 100) + '% ' + (N * 100) + '%';
@@ -118,7 +148,7 @@
 
         function onUp(e) {
           window.removeEventListener('pointermove', onMove);
-          ghost.remove(); ghost = null;
+          if (ghost) { ghost.remove(); ghost = null; }
           var target = document.elementFromPoint(e.clientX, e.clientY);
           var slot = target && target.closest ? target.closest('.puz-slot') : null;
           if (slot && !slot.children.length &&
