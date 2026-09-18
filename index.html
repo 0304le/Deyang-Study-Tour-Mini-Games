@@ -1,15 +1,59 @@
-<!doctype html>
+﻿﻿<!DOCTYPE html>
 <html lang="zh-CN">
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="refresh" content="0;url=./%E6%B8%B8%E6%88%8F/%E6%B8%B8%E6%88%8F/">
-  <meta name="referrer" content="no-referrer">
-  <title>重定向中…</title>
-  <style>body{font-family:system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial;color:#333;background:#fff;margin:40px;text-align:center}a{color:#c63}</style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>德阳文化探秘 · 九大讲解员互动小游戏</title>
+<link rel="stylesheet" href="style.css?v=24">
 </head>
 <body>
-  <h2>站点已发布，正在跳转到最新版本…</h2>
-  <p>如果浏览器未自动跳转，请点击下面的链接：</p>
-  <p><a href="./游戏/游戏/">进入站点 · 游戏/游戏/</a></p>
+
+<header class="hero">
+  <div class="hero-inner">
+    <div class="hero-mark">德阳</div>
+    <h1>德阳文化探秘之旅</h1>
+    <p class="hero-sub">跟随九位讲解员，穿越古蜀关隘、红色记忆与烟火人间<br>集齐九枚文化碎片，拼出一座城的文化长卷</p>
+    <div class="progress-wrap">
+      <div class="progress-info">
+        <span>文化碎片收集进度</span>
+        <span id="progressText">0 / 9</span>
+      </div>
+      <div class="progress-bar"><div id="progressBar" class="progress-fill"></div></div>
+      <div id="fragmentBar" class="fragment-bar"></div>
+    </div>
+  </div>
+</header>
+
+<main class="container">
+  <div id="stationGrid" class="station-grid"></div>
+  <div id="allDone" class="all-done" hidden>
+    <div class="all-done-seal">大成</div>
+    <h2>九鼎齐聚 · 文化大成</h2>
+    <p>古蜀、忠魂、石镌、年画、翠山、嘉禾、保节、锦纹、蜀味——九枚碎片在握，你已走完德阳文化长卷。</p>
+    <div class="all-done-btns">
+      <button id="aiReportBtn" class="btn btn-report" type="button">✨ 生成我的 AI 研学报告</button>
+      <button id="resetBtn" class="btn btn-ghost btn-sm" type="button">重新开始探索</button>
+    </div>
+  </div>
+</main>
+
+<footer class="footer">
+  <span>德阳 · 古蜀风华文旅互动体验</span>
+  <button id="saveBtn" class="link-btn">存档 / 读档</button>
+  <button id="resetBtn2" class="link-btn">重置收集进度</button>
+</footer>
+
+<script src="js/common.js?v=24"></script>
+<script src="js/g1-puzzle.js?v=24"></script>
+<script src="js/g2-scratch.js?v=24"></script>
+<script src="js/g3-balloons.js?v=24"></script>
+<script src="js/g4-coloring.js?v=24"></script>
+<script src="js/g5-hidden.js?v=24"></script>
+<script src="js/g6-rain.js?v=24"></script>
+<script src="js/g7-dialogue.js?v=24"></script>
+<script src="js/g8-magnifier.js?v=24"></script>
+<script src="js/g9-cooking.js?v=24"></script>
+<script src="js/main.js?v=24"></script>
+<script src="js/report.js?v=24"></script>
 </body>
 </html>
