@@ -44,33 +44,51 @@
       var won = false;
       var wrongSet = {};
 
-      /* ====== 图片预加载：文生图接口生成需数秒，必须等图就绪再显示 ====== */
-      var imgState = {}; // url -> {ok:bool, im:Image, cbs:[]}
+      /* ====== 图片预加载：文生图接口生成需十几秒，只预取当前图与下一张，避免并发排队 ====== */
+      var imgState = {}; // url -> {ok, loading, fails, im}
 
-      // 进入即并行预加载全部 4 幅，答第一题时其余图已在后台生成，切关秒开
-      rounds.forEach(function (r) { preload(r.img, function () {}); });
-
-      function preload(url, onReady) {
-        var st = imgState[url];
-        if (!st) {
-          st = imgState[url] = { ok: false, im: null, cbs: [] };
-        }
-        if (st.ok) { onReady(); return; }
-        st.cbs.push(onReady);
-        if (st.im) return; // 已在加载中，等回调即可
+      // 后台加载单张：40 秒超时，失败自动重试 2 次；等待者在成功或最终失败时才移除
+      function fetchImg(url) {
+        var st = imgState[url] || (imgState[url] = { ok: false, loading: false, fails: 0, im: null, waiters: [] });
+        if (st.ok || st.loading) return st;
+        st.loading = true;
         var im = new Image();
         st.im = im;
-        im.onload = function () {
-          st.ok = true;
-          st.cbs.forEach(function (cb) { cb(); });
-          st.cbs = [];
-        };
-        im.onerror = function () {
-          // 生成偶发失败：3 秒后自动重试一次
+        var timer = setTimeout(function () { finish(new Error('timeout')); }, 40000);
+        function notify(ok, phase) {
+          st.waiters.slice().forEach(function (cb) { cb(ok, phase); });
+        }
+        function finish(err) {
+          clearTimeout(timer);
+          st.loading = false;
           st.im = null;
-          setTimeout(function () { preload(url, function () {}); }, 3000);
-        };
+          if (!err) {
+            st.ok = true;
+            st.fails = 0;
+            notify(true, 'ok');
+            st.waiters = [];
+          } else if (st.fails < 2) {
+            st.fails++;
+            notify(false, 'retrying'); // UI 显示"重试中"，等待者保留
+            setTimeout(function () { fetchImg(url); }, 2500);
+          } else {
+            notify(false, 'fatal');    // 通知显示手动重试按钮，等待者保留
+            st.fails = 0;
+          }
+        }
+        im.onload = function () { finish(null); };
+        im.onerror = function () { finish(new Error('error')); };
         im.src = url;
+        return st;
+      }
+      // 等待某张图就绪；cb(phase): ok / retrying / fatal
+      function whenReady(url, cb) {
+        var st = imgState[url];
+        if (st && st.ok) { cb('ok'); return; }
+        fetchImg(url).waiters.push(function (ok, phase) { cb(ok ? 'ok' : phase); });
+      }
+      function prefetchNext() {
+        if (roundIdx + 1 < rounds.length) fetchImg(rounds[roundIdx + 1].img);
       }
 
       function renderRound() {
@@ -89,7 +107,10 @@
             }).join('') +
           '</div>' +
           '<div class="mag-wrap">' +
-            '<div class="mag-board"><div class="mag-lens"></div></div>' +
+            '<div class="mag-board"><div class="mag-lens"></div>' +
+              '<div class="mag-mask"><span class="mag-spinner"></span><span class="mag-mask-text">织锦生成中 · 请稍候</span>' +
+              '<button type="button" class="mag-retry" hidden>图片生成失败，点此重新加载</button></div>' +
+            '</div>' +
             '<div class="mag-side">' +
               '<h3>第 ' + (roundIdx + 1) + ' / 4 幅锦样</h3>' +
               '<p class="mag-hint">🔍 ' + cur.hint + '</p>' +
@@ -105,17 +126,47 @@
 
         var board = root.querySelector('.mag-board');
         var lens = root.querySelector('.mag-lens');
-        // 等图片真正就绪再显示，加载期间展示"织造中"提示
-        board.classList.add('mag-loading');
+        var mask = root.querySelector('.mag-mask');
+        var spinner = root.querySelector('.mag-spinner');
+        var maskText = root.querySelector('.mag-mask-text');
+        var retryBtn = root.querySelector('.mag-retry');
+        // 等图片真正就绪再显示；切换中/重试中/失败均有对应提示
         board.style.backgroundImage = 'none';
         lens.style.backgroundImage = 'none';
-        preload(cur.img, function () {
-          // 玩家可能已切到下一幅，仅当仍是当前图时才应用
+
+        function showMask(mode) {
+          mask.hidden = false;
+          if (mode === 'fatal') {
+            spinner.hidden = true;
+            maskText.textContent = '织锦生成遇到问题';
+            retryBtn.hidden = false;
+          } else {
+            spinner.hidden = false;
+            retryBtn.hidden = true;
+            maskText.textContent = mode === 'retrying' ? '生成重试中 · 请稍候' : '织锦生成中 · 请稍候';
+          }
+        }
+        function applyImage() {
           if (rounds[roundIdx] && rounds[roundIdx].img === cur.img) {
-            board.classList.remove('mag-loading');
+            mask.hidden = true;
             board.style.backgroundImage = 'url("' + cur.img + '")';
             lens.style.backgroundImage = 'url("' + cur.img + '")';
+            prefetchNext(); // 本图就绪后再后台预取下一幅
           }
+        }
+        showMask('loading');
+        whenReady(cur.img, function (phase) {
+          if (phase === 'ok') applyImage();
+          else if (phase === 'retrying') showMask('retrying');
+          else showMask('fatal');
+        });
+        retryBtn.addEventListener('click', function () {
+          showMask('loading');
+          whenReady(cur.img, function (phase) {
+            if (phase === 'ok') applyImage();
+            else if (phase === 'retrying') showMask('retrying');
+            else showMask('fatal');
+          });
         });
 
         board.addEventListener('pointermove', function (e) {
