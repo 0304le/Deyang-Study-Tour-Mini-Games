@@ -47,7 +47,7 @@
       /* ====== 图片双源预加载：jsDelivr 国内 CDN 优先（快），失败自动回退 GitHub 源 ====== */
       var imgState = {}; // 相对路径 -> {ok, loading, fails, srcIdx, url, im, waiters}
 
-      // 后台加载单张：CDN 源 15 秒超时、GitHub 源 40 秒，各自动重试 2 次
+      // 后台加载单张：CDN 源 8 秒超时、只试 1 次快速回退；GitHub 源 30 秒、重试 3 次
       function fetchImg(rel) {
         var st = imgState[rel] ||
           (imgState[rel] = { ok: false, loading: false, fails: 0, srcIdx: 0, url: null, im: null, waiters: [] });
@@ -57,7 +57,7 @@
         var curUrl = useCdn ? G.cdn(rel) : rel;
         var im = new Image();
         st.im = im;
-        var timer = setTimeout(function () { finish(new Error('timeout')); }, useCdn ? 15000 : 40000);
+        var timer = setTimeout(function () { finish(new Error('timeout')); }, useCdn ? 8000 : 30000);
         function notify(ok, phase) {
           st.waiters.slice().forEach(function (cb) { cb(ok, phase); });
         }
@@ -70,16 +70,16 @@
             st.ok = true; st.fails = 0; st.url = curUrl;
             notify(true, 'ok');
             st.waiters = [];
-          } else if (st.fails < 2) {
-            st.fails++;
-            notify(false, 'retrying'); // UI 显示"重试中"，等待者保留
-            again(2000);
           } else if (st.srcIdx === 0) {
-            st.srcIdx = 1; st.fails = 0;   // CDN 两路重试均败 → 切 GitHub 源
+            st.srcIdx = 1; st.fails = 0;   // CDN 一次不通立刻切 GitHub 源，不浪费时间
             notify(false, 'retrying');
-            again(1500);
+            again(800);
+          } else if (st.fails < 3) {
+            st.fails++;
+            notify(false, 'retrying');
+            again(2000);
           } else {
-            notify(false, 'fatal');    // 通知显示手动重试按钮，等待者保留
+            notify(false, 'fatal');
           }
         }
         im.onload = function () { finish(null); };
@@ -114,8 +114,8 @@
           '</div>' +
           '<div class="mag-wrap">' +
             '<div class="mag-board"><div class="mag-lens"></div>' +
-              '<div class="mag-mask"><span class="mag-spinner"></span><span class="mag-mask-text">织锦生成中 · 请稍候</span>' +
-              '<button type="button" class="mag-retry" hidden>图片生成失败，点此重新加载</button></div>' +
+              '<div class="mag-mask"><span class="mag-spinner"></span><span class="mag-mask-text">图片加载中 · 请稍候</span>' +
+              '<button type="button" class="mag-retry" hidden>图片加载失败，点此重新加载</button></div>' +
             '</div>' +
             '<div class="mag-side">' +
               '<h3>第 ' + (roundIdx + 1) + ' / 4 幅锦样</h3>' +
@@ -144,12 +144,12 @@
           mask.hidden = false;
           if (mode === 'fatal') {
             spinner.hidden = true;
-            maskText.textContent = '织锦生成遇到问题';
+            maskText.textContent = '图片加载遇到问题';
             retryBtn.hidden = false;
           } else {
             spinner.hidden = false;
             retryBtn.hidden = true;
-            maskText.textContent = mode === 'retrying' ? '生成重试中 · 请稍候' : '织锦生成中 · 请稍候';
+            maskText.textContent = mode === 'retrying' ? '正在切换线路 · 请稍候' : '图片加载中 · 请稍候';
           }
         }
         function applyImage() {
