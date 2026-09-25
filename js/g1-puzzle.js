@@ -2,12 +2,13 @@
 (function () {
   'use strict';
 
+  // 图片已下载为本地静态文件（assets/img/），不依赖在线生图接口
   var PUZZLES = [
-    { img: G.IMG('四川德阳白马关古蜀道关隘古战场，三国风格城墙关楼旌旗，远山苍茫，国风写实历史插画，方形构图，细节丰富', 'square_hd'),
+    { img: 'assets/img/g1-1-baimaguan.png',
       name: '白马关古战场' },
-    { img: G.IMG('四川德阳文庙大成殿全景，红墙黄瓦古建筑群，棂星门泮池，古柏参天，国风写实建筑插画，方形构图', 'square_hd'),
+    { img: 'assets/img/g1-2-wenmiao.png',
       name: '德阳文庙' },
-    { img: G.IMG('三星堆青铜面具特写，神秘夸张纵目面具，金色面罩，古蜀文明祭祀场景，国风写实考古插画，方形构图', 'square_hd'),
+    { img: 'assets/img/g1-3-sanxingdui.png',
       name: '三星堆青铜面具' }
   ];
 

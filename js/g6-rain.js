@@ -2,18 +2,10 @@
 (function () {
   'use strict';
 
-  var IMG_DRY = G.IMG(
-    '四川梯田水稻严重干旱场景，龟裂的水田泥土，枯黄萎靡的稻禾，烈日当空，写实农业插画',
-    'landscape_4_3'
-  );
-  var IMG_OK = G.IMG(
-    '四川梯田水稻成熟丰收场景，金黄饱满的稻穗健康挺立，水面倒映蓝天，阳光明媚，写实农业插画',
-    'landscape_4_3'
-  );
-  var IMG_BAD = G.IMG(
-    '连日暴雨后四川稻田洪涝场景，水稻被风雨吹打折断倒伏泡在积水中，天空灰暗雨幕，写实农业插画',
-    'landscape_4_3'
-  );
+  // 图片已下载为本地静态文件（assets/img/），不依赖在线生图接口
+  var IMG_DRY = 'assets/img/g6-dry.png';
+  var IMG_OK = 'assets/img/g6-ok.png';
+  var IMG_BAD = 'assets/img/g6-bad.png';
 
   // 水稻三个生长期，需水量各不相同
   var STAGES = [

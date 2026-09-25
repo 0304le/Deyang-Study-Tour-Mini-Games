@@ -2,10 +2,8 @@
 (function () {
   'use strict';
 
-  var DISH = G.IMG(
-    '四川名菜连山回锅肉成品菜特写，大片五花肉与青蒜苗同炒，红油发亮灯盏窝形，热气腾腾，美食摄影',
-    'square'
-  );
+  // 图片已下载为本地静态文件（assets/img/），不依赖在线生图接口
+  var DISH = 'assets/img/g9-dish.png';
 
   // 三阶段、十二步正确投料顺序；phase 标识所属阶段
   var STEPS = [

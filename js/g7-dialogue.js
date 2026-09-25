@@ -2,10 +2,8 @@
 (function () {
   'use strict';
 
-  var SCENE = G.IMG(
-    '四川德阳孝泉古镇正月十六拉保保民俗场景，青瓦古街张灯结彩，人群热闹，母亲抱着幼童给路人戴红色宝宝帽认干爹，喜庆中国红，国风民俗插画',
-    'landscape_4_3'
-  );
+  // 图片已下载为本地静态文件（assets/img/），不依赖在线生图接口
+  var SCENE = 'assets/img/g7-scene.png';
 
   // speaker：说话人；ok 为正确选项下标；tip 为选错时的中断提示
   var NODES = [
