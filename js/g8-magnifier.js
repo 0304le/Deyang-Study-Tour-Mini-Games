@@ -44,47 +44,61 @@
       var won = false;
       var wrongSet = {};
 
-      /* ====== 图片双源预加载：jsDelivr 国内 CDN 优先（快），失败自动回退 GitHub 源 ====== */
-      var imgState = {}; // 相对路径 -> {ok, loading, fails, srcIdx, url, im, waiters}
+      /* ====== 图片加载：真实 <img> 先走 CDN，失败立刻切回 GitHub 源（与其他关卡完全相同的机制） ====== */
+      var imgState = {}; // 相对路径 -> {ok, loading, fails, url, waiters, probe}
 
-      // 后台加载单张：CDN 源 8 秒超时、只试 1 次快速回退；GitHub 源 30 秒、重试 3 次
       function fetchImg(rel) {
         var st = imgState[rel] ||
-          (imgState[rel] = { ok: false, loading: false, fails: 0, srcIdx: 0, url: null, im: null, waiters: [] });
+          (imgState[rel] = { ok: false, loading: false, fails: 0, url: null, waiters: [], probe: null });
         if (st.ok || st.loading) return st;
         st.loading = true;
-        var useCdn = st.srcIdx === 0;
-        var curUrl = useCdn ? G.cdn(rel) : rel;
-        var im = new Image();
-        st.im = im;
-        var timer = setTimeout(function () { finish(new Error('timeout')); }, useCdn ? 8000 : 30000);
+
+        var viaCdn = true, timer = null;
+        var probe = document.createElement('img');
+        probe.setAttribute('alt', '');
+        probe.style.cssText = 'position:absolute;width:1px;height:1px;opacity:0;pointer-events:none';
+        st.probe = probe;
+
         function notify(ok, phase) {
           st.waiters.slice().forEach(function (cb) { cb(ok, phase); });
         }
-        function again(delay) { setTimeout(function () { fetchImg(rel); }, delay); }
-        function finish(err) {
-          clearTimeout(timer);
+        function cleanup() {
+          if (timer) clearTimeout(timer);
+          if (probe.parentNode) probe.parentNode.removeChild(probe);
+          st.probe = null;
+        }
+        function done() {
+          st.ok = true; st.loading = false; st.fails = 0;
+          st.url = probe.getAttribute('src');
+          cleanup();
+          notify(true, 'ok');
+          st.waiters = [];
+        }
+        function failed() {
+          cleanup();
           st.loading = false;
-          st.im = null;
-          if (!err) {
-            st.ok = true; st.fails = 0; st.url = curUrl;
-            notify(true, 'ok');
-            st.waiters = [];
-          } else if (st.srcIdx === 0) {
-            st.srcIdx = 1; st.fails = 0;   // CDN 一次不通立刻切 GitHub 源，不浪费时间
-            notify(false, 'retrying');
-            again(800);
-          } else if (st.fails < 3) {
+          if (st.fails < 2) {
             st.fails++;
             notify(false, 'retrying');
-            again(2000);
+            setTimeout(function () { fetchImg(rel); }, 1200);
           } else {
             notify(false, 'fatal');
           }
         }
-        im.onload = function () { finish(null); };
-        im.onerror = function () { finish(new Error('error')); };
-        im.src = curUrl;
+        probe.onload = function () { done(); };
+        probe.onerror = function () {
+          if (timer) { clearTimeout(timer); timer = null; }
+          if (viaCdn) {
+            viaCdn = false; // CDN 不通，同一机制立刻换 GitHub 源
+            timer = setTimeout(failed, 20000);
+            probe.src = rel;
+          } else {
+            failed();
+          }
+        };
+        root.appendChild(probe);
+        timer = setTimeout(failed, 12000);
+        probe.src = G.cdn(rel);
         return st;
       }
       // 等待某张图就绪；cb(phase): ok / retrying / fatal
@@ -169,8 +183,7 @@
           else showMask('fatal');
         });
         retryBtn.addEventListener('click', function () {
-          var st = imgState[cur.img]; // 手动重试：重置后从最快的 CDN 源开始
-          if (st) { st.srcIdx = 0; st.fails = 0; st.loading = false; }
+          delete imgState[cur.img]; // 手动重试：彻底重置，重新从 CDN 开始
           showMask('loading');
           whenReady(cur.img, function (phase) {
             if (phase === 'ok') applyImage();
