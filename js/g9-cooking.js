@@ -3,7 +3,7 @@
   'use strict';
 
   // 图片已下载为本地静态文件（assets/img/），不依赖在线生图接口
-  var DISH = 'assets/img/g9-dish.png';
+  var DISH = 'assets/img/g9-dish.jpg';
 
   // 三阶段、十二步正确投料顺序；phase 标识所属阶段
   var STEPS = [

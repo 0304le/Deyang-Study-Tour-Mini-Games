@@ -4,11 +4,11 @@
 
   // 图片已下载为本地静态文件（assets/img/），不依赖在线生图接口
   var PUZZLES = [
-    { img: 'assets/img/g1-1-baimaguan.png',
+    { img: 'assets/img/g1-1-baimaguan.jpg',
       name: '白马关古战场' },
-    { img: 'assets/img/g1-2-wenmiao.png',
+    { img: 'assets/img/g1-2-wenmiao.jpg',
       name: '德阳文庙' },
-    { img: 'assets/img/g1-3-sanxingdui.png',
+    { img: 'assets/img/g1-3-sanxingdui.jpg',
       name: '三星堆青铜面具' }
   ];
 

@@ -3,9 +3,9 @@
   'use strict';
 
   // 图片已下载为本地静态文件（assets/img/），不依赖在线生图接口
-  var IMG_DRY = 'assets/img/g6-dry.png';
-  var IMG_OK = 'assets/img/g6-ok.png';
-  var IMG_BAD = 'assets/img/g6-bad.png';
+  var IMG_DRY = 'assets/img/g6-dry.jpg';
+  var IMG_OK = 'assets/img/g6-ok.jpg';
+  var IMG_BAD = 'assets/img/g6-bad.jpg';
 
   // 水稻三个生长期，需水量各不相同
   var STAGES = [

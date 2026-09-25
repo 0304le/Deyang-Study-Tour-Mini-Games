@@ -8,22 +8,22 @@
   var PATTERNS = [
     {
       v: 'xiangfeng', t: '翔凤穿花纹',
-      img: 'assets/img/g8-1-xiangfeng.png',
+      img: 'assets/img/g8-1-xiangfeng.jpg',
       hint: '镜中可见凤鸟展翅、尾翎修长，穿行于牡丹团花与祥云之间。'
     },
     {
       v: 'badayun', t: '八达晕纹',
-      img: 'assets/img/g8-2-badayun.png',
+      img: 'assets/img/g8-2-badayun.jpg',
       hint: '镜中是以直线构成的米字几何骨架，向八方延伸，格子里填着花卉。'
     },
     {
       v: 'tianma', t: '联珠天马纹',
-      img: 'assets/img/g8-3-tianma.png',
+      img: 'assets/img/g8-3-tianma.jpg',
       hint: '镜中是一圈圆珠围成的圆环，环内有一匹生着翅膀的天马在奔腾。'
     },
     {
       v: 'denglong', t: '灯笼八吉纹',
-      img: 'assets/img/g8-4-denglong.png',
+      img: 'assets/img/g8-4-denglong.jpg',
       hint: '镜中是一盏盏宫灯，灯下有流苏、盘长结和八吉祥杂宝。'
     },
     { v: 'juancao', t: '卷草牡丹纹' },

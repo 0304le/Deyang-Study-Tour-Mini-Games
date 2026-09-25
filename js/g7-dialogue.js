@@ -3,7 +3,7 @@
   'use strict';
 
   // 图片已下载为本地静态文件（assets/img/），不依赖在线生图接口
-  var SCENE = 'assets/img/g7-scene.png';
+  var SCENE = 'assets/img/g7-scene.jpg';
 
   // speaker：说话人；ok 为正确选项下标；tip 为选错时的中断提示
   var NODES = [

@@ -7,7 +7,7 @@
   var ROUNDS = [
     {
       name: '第一景 · 龙门山林海',
-      img: 'assets/img/g5-1-linhai.png',
+      img: 'assets/img/g5-1-linhai.jpg',
       targets: [
         { key: 'gongtong', name: '珙桐（鸽子花）', x: 15, y: 58 },
         { key: 'jinji', name: '红腹锦鸡', x: 82, y: 60 },
@@ -16,7 +16,7 @@
     },
     {
       name: '第二景 · 山涧溪谷',
-      img: 'assets/img/g5-2-xigu.png',
+      img: 'assets/img/g5-2-xigu.jpg',
       targets: [
         { key: 'dani', name: '大鲵（娃娃鱼）', x: 20, y: 82 },
         { key: 'bailu', name: '白鹭', x: 78, y: 62 },
@@ -25,7 +25,7 @@
     },
     {
       name: '第三景 · 高山花海',
-      img: 'assets/img/g5-3-huahai.png',
+      img: 'assets/img/g5-3-huahai.jpg',
       targets: [
         { key: 'xiaoxiongmao', name: '小熊猫', x: 22, y: 62 },
         { key: 'hongzhi', name: '绿尾虹雉', x: 78, y: 58 },
