@@ -6,6 +6,8 @@
   var IMG_DRY = 'assets/img/g6-dry.jpg';
   var IMG_OK = 'assets/img/g6-ok.jpg';
   var IMG_BAD = 'assets/img/g6-bad.jpg';
+  // CDN 加载失败时自动切回 GitHub 源
+  var FB_ERR = 'onerror="this.onerror=null;if(this.dataset.fb){this.src=this.dataset.fb;}"';
 
   // 水稻三个生长期，需水量各不相同
   var STAGES = [
@@ -42,9 +44,9 @@
           }).join('<b class="rg-line"></b>') +
         '</div>' +
         '<div class="rain-stage">' +
-          '<img class="img-dry" src="' + IMG_DRY + '" alt="干旱">' +
-          '<img class="img-ok" src="' + IMG_OK + '" alt="健康">' +
-          '<img class="img-bad" src="' + IMG_BAD + '" alt="倒伏">' +
+          '<img class="img-dry" src="' + G.cdn(IMG_DRY) + '" data-fb="' + IMG_DRY + '" alt="干旱" ' + FB_ERR + '>' +
+          '<img class="img-ok" src="' + G.cdn(IMG_OK) + '" data-fb="' + IMG_OK + '" alt="健康" ' + FB_ERR + '>' +
+          '<img class="img-bad" src="' + G.cdn(IMG_BAD) + '" data-fb="' + IMG_BAD + '" alt="倒伏" ' + FB_ERR + '>' +
           '<div class="rain-overlay"></div>' +
           '<div class="rain-badge"></div>' +
           '<div class="rain-weather"></div>' +

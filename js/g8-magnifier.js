@@ -44,48 +44,54 @@
       var won = false;
       var wrongSet = {};
 
-      /* ====== 图片预加载：文生图接口生成需十几秒，只预取当前图与下一张，避免并发排队 ====== */
-      var imgState = {}; // url -> {ok, loading, fails, im}
+      /* ====== 图片双源预加载：jsDelivr 国内 CDN 优先（快），失败自动回退 GitHub 源 ====== */
+      var imgState = {}; // 相对路径 -> {ok, loading, fails, srcIdx, url, im, waiters}
 
-      // 后台加载单张：40 秒超时，失败自动重试 2 次；等待者在成功或最终失败时才移除
-      function fetchImg(url) {
-        var st = imgState[url] || (imgState[url] = { ok: false, loading: false, fails: 0, im: null, waiters: [] });
+      // 后台加载单张：CDN 源 15 秒超时、GitHub 源 40 秒，各自动重试 2 次
+      function fetchImg(rel) {
+        var st = imgState[rel] ||
+          (imgState[rel] = { ok: false, loading: false, fails: 0, srcIdx: 0, url: null, im: null, waiters: [] });
         if (st.ok || st.loading) return st;
         st.loading = true;
+        var useCdn = st.srcIdx === 0;
+        var curUrl = useCdn ? G.cdn(rel) : rel;
         var im = new Image();
         st.im = im;
-        var timer = setTimeout(function () { finish(new Error('timeout')); }, 40000);
+        var timer = setTimeout(function () { finish(new Error('timeout')); }, useCdn ? 15000 : 40000);
         function notify(ok, phase) {
           st.waiters.slice().forEach(function (cb) { cb(ok, phase); });
         }
+        function again(delay) { setTimeout(function () { fetchImg(rel); }, delay); }
         function finish(err) {
           clearTimeout(timer);
           st.loading = false;
           st.im = null;
           if (!err) {
-            st.ok = true;
-            st.fails = 0;
+            st.ok = true; st.fails = 0; st.url = curUrl;
             notify(true, 'ok');
             st.waiters = [];
           } else if (st.fails < 2) {
             st.fails++;
             notify(false, 'retrying'); // UI 显示"重试中"，等待者保留
-            setTimeout(function () { fetchImg(url); }, 2500);
+            again(2000);
+          } else if (st.srcIdx === 0) {
+            st.srcIdx = 1; st.fails = 0;   // CDN 两路重试均败 → 切 GitHub 源
+            notify(false, 'retrying');
+            again(1500);
           } else {
             notify(false, 'fatal');    // 通知显示手动重试按钮，等待者保留
-            st.fails = 0;
           }
         }
         im.onload = function () { finish(null); };
         im.onerror = function () { finish(new Error('error')); };
-        im.src = url;
+        im.src = curUrl;
         return st;
       }
       // 等待某张图就绪；cb(phase): ok / retrying / fatal
-      function whenReady(url, cb) {
-        var st = imgState[url];
+      function whenReady(rel, cb) {
+        var st = imgState[rel];
         if (st && st.ok) { cb('ok'); return; }
-        fetchImg(url).waiters.push(function (ok, phase) { cb(ok ? 'ok' : phase); });
+        fetchImg(rel).waiters.push(function (ok, phase) { cb(ok ? 'ok' : phase); });
       }
       function prefetchNext() {
         if (roundIdx + 1 < rounds.length) fetchImg(rounds[roundIdx + 1].img);
@@ -148,9 +154,11 @@
         }
         function applyImage() {
           if (rounds[roundIdx] && rounds[roundIdx].img === cur.img) {
+            var st = imgState[cur.img];
+            var u = (st && st.url) ? st.url : cur.img;
             mask.hidden = true;
-            board.style.backgroundImage = 'url("' + cur.img + '")';
-            lens.style.backgroundImage = 'url("' + cur.img + '")';
+            board.style.backgroundImage = 'url("' + u + '")';
+            lens.style.backgroundImage = 'url("' + u + '")';
             prefetchNext(); // 本图就绪后再后台预取下一幅
           }
         }
@@ -161,6 +169,8 @@
           else showMask('fatal');
         });
         retryBtn.addEventListener('click', function () {
+          var st = imgState[cur.img]; // 手动重试：重置后从最快的 CDN 源开始
+          if (st) { st.srcIdx = 0; st.fails = 0; st.loading = false; }
           showMask('loading');
           whenReady(cur.img, function (phase) {
             if (phase === 'ok') applyImage();

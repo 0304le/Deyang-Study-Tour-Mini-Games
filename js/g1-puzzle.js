@@ -67,7 +67,7 @@
         function makePiece(p) {
           var el = G.el('div', 'puz-piece');
           el.dataset.i = p.idx;
-          el.style.backgroundImage = 'url("' + puz.img + '")';
+          G.loadImg(puz.img, function (u) { if (u) el.style.backgroundImage = 'url("' + u + '")'; });
           el.style.backgroundPosition = p.pos;
           el.addEventListener('pointerdown', startDrag);
           return el;

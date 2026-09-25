@@ -53,7 +53,8 @@
     mount: function (root, api) {
       root.innerHTML =
         '<div class="game-tip">跟随剧情做出选择。<b>选错会提示"剧情中断"，需要重新选择</b>；全程不中断地走完故事线即可通关。</div>' +
-        '<img class="dlg-scene" src="' + SCENE + '" alt="孝泉保保节">' +
+        '<img class="dlg-scene" src="' + G.cdn(SCENE) + '" data-fb="' + SCENE + '" alt="孝泉保保节" ' +
+          'onerror="this.onerror=null;if(this.dataset.fb){this.src=this.dataset.fb;}">' +
         '<div class="dlg-box"></div>';
 
       var box = root.querySelector('.dlg-box');

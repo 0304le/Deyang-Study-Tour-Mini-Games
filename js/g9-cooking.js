@@ -55,7 +55,8 @@
               '<span class="pot-flame"></span>' +
               '<div class="pot-body"></div>' +
               '<div class="pot-rim"></div>' +
-              '<div class="pot-food"><img class="pot-dish" src="' + DISH + '" alt="回锅肉"></div>' +
+              '<div class="pot-food"><img class="pot-dish" src="' + G.cdn(DISH) + '" data-fb="' + DISH + '" alt="回锅肉" ' +
+                'onerror="this.onerror=null;if(this.dataset.fb){this.src=this.dataset.fb;}"></div>' +
               '<span class="steam s1"></span><span class="steam s2"></span><span class="steam s3"></span>' +
             '</div>' +
             '<div class="cook-added"></div>' +

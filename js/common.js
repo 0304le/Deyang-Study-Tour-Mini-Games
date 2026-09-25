@@ -49,6 +49,21 @@
       encodeURIComponent(prompt) + '&image_size=' + size;
   }
 
+  /* ====== 图片双源加载：国内 CDN(jsDelivr) 优先，GitHub 源自动回退 ====== */
+  var CDN_BASE = 'https://cdn.jsdelivr.net/gh/0304le/Deyang-Study-Tour-Mini-Games@main/';
+  function cdn(rel) { return CDN_BASE + rel; }
+  // rel 形如 'assets/img/g8-1-xiangfeng.jpg'；成功 cb(实际可用URL)，两路皆败 cb(null)
+  function loadImg(rel, cb) {
+    var settled = false;
+    var fb = new Image();
+    fb.onload = function () { if (!settled) { settled = true; cb(rel); } };
+    fb.onerror = function () { if (!settled) { settled = true; cb(null); } };
+    var im = new Image();
+    im.onload = function () { if (!settled) { settled = true; cb(CDN_BASE + rel); } };
+    im.onerror = function () { fb.src = rel; };
+    im.src = CDN_BASE + rel;
+  }
+
   var registry = {};
 
   function register(id, def) { registry[id] = def; }
@@ -219,6 +234,8 @@
     el: el,
     shuffle: shuffle,
     toast: toast,
+    cdn: cdn,
+    loadImg: loadImg,
     IMG: IMG
   };
 })();

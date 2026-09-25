@@ -56,7 +56,8 @@
             }).join('<i class="hunt-arrow">→</i>') +
           '</div>' +
           '<div class="hunt-stage">' +
-            '<img src="' + rd.img + '" alt="' + rd.name + '" draggable="false">' +
+            '<img src="' + G.cdn(rd.img) + '" data-fb="' + rd.img + '" alt="' + rd.name + '" draggable="false" ' +
+              'onerror="this.onerror=null;if(this.dataset.fb){this.src=this.dataset.fb;}">' +
           '</div>' +
           '<div class="hunt-list">' +
             rd.targets.map(function (t) {
